@@ -18,7 +18,11 @@ namespace E2ETests
 
         public static string GetApplicationPath()
         {
+#if NETSTANDARDAPP_15
             return Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "src", "MusicStore"));
+#else
+            return Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "..", "..", "src", "MusicStore"));
+#endif
         }
 
         public static void SetInMemoryStoreForIIS(DeploymentParameters deploymentParameters, ILogger logger)
@@ -28,14 +32,7 @@ namespace E2ETests
                 // Can't use localdb with IIS. Setting an override to use InMemoryStore.
                 logger.LogInformation("Creating configoverride.json file to override default config.");
 
-                var compileRoot = Path.GetFullPath(
-                    Path.Combine(
-                        deploymentParameters.ApplicationPath,
-                        "..", "approot", "packages", "MusicStore"));
-
-                // We don't know the exact version number with which sources are built.
-                string overrideConfig = Path.Combine(Directory.GetDirectories(compileRoot).First(), "root", "configoverride.json");
-
+                string overrideConfig = Path.Combine(deploymentParameters.ApplicationPath, ".." , "configoverride.json");
 
                 File.WriteAllText(overrideConfig, "{\"UseInMemoryDatabase\": \"true\"}");
             }
